@@ -63,60 +63,29 @@ class _TimelineState extends State<Timeline> {
   }
 
   buildUsersToFollow() {
-    return StreamBuilder(
-      stream:
-          usersRef.orderBy('timestamp', descending: true).limit(30).snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return circularProgress();
-        }
-        List<UserResult> userResults = [];
-        snapshot.data.documents.forEach((doc) {
-          User user = User.fromDocument(doc);
-          final bool isAuthUser = currentUser.id == user.id;
-          final bool isFollowingUser = followingList.contains(user.id);
-          // remove auth user from recommended list
-          if (isAuthUser) {
-            return;
-          } else if (isFollowingUser) {
-            return;
-          } else {
-            UserResult userResult = UserResult(user);
-            userResults.add(userResult);
-          }
-        });
-        return Container(
-          color: Theme.of(context).accentColor.withOpacity(0.2),
-          child: Column(
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.all(12.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(
-                      Icons.person_add,
+    return Container(
+      child: Column(
+        children: <Widget>[
+          Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Center(
+                  child: Text(
+                    "No post available",
+                    style: TextStyle(
                       color: Theme.of(context).primaryColor,
-                      size: 30.0,
+                      fontSize: 30.0,
                     ),
-                    SizedBox(
-                      width: 8.0,
-                    ),
-                    Text(
-                      "Users to Follow",
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontSize: 30.0,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              Column(children: userResults),
-            ],
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 

@@ -8,6 +8,7 @@ import 'package:fluttershare/pages/home.dart';
 import 'package:fluttershare/widgets/post.dart';
 import 'package:fluttershare/widgets/post_tile.dart';
 import 'package:fluttershare/widgets/progress.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class Profile extends StatefulWidget {
   final String profileId;
@@ -233,7 +234,10 @@ class _ProfileState extends State<Profile> {
         .document(widget.profileId)
         .collection('userFollowers')
         .document(currentUserId)
-        .setData({});
+        .setData({
+      "age": currentUser.age,
+      "country": currentUser.country,
+    });
     // Put THAT user on YOUR following collection (update your following collection)
     followingRef
         .document(currentUserId)
@@ -248,90 +252,13 @@ class _ProfileState extends State<Profile> {
         .setData({
       "type": "follow",
       "ownerId": widget.profileId,
-      "username": currentUser.username,
+      "username": currentUser.displayName,
       "userId": currentUserId,
       "userProfileImg": currentUser.photoUrl,
       "timestamp": timestamp,
     });
   }
 
-  /*buildProfileHeader() {
-    return FutureBuilder(
-        future: usersRef.document(widget.profileId).get(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return circularProgress();
-          }
-          User user = User.fromDocument(snapshot.data);
-          return Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    CircleAvatar(
-                      radius: 40.0,
-                      backgroundColor: Colors.grey,
-                      backgroundImage:
-                          CachedNetworkImageProvider(user.photoUrl),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        children: <Widget>[
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              buildCountColumn("posts", postCount),
-                              buildCountColumn("followers", followerCount),
-                              buildCountColumn("following", followingCount),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              buildProfileButton(),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  alignment: Alignment.centerLeft,
-                  padding: EdgeInsets.only(top: 12.0),
-                  child: Text(
-                    user.username,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
-                    ),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.centerLeft,
-                  padding: EdgeInsets.only(top: 4.0),
-                  child: Text(
-                    user.displayName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.centerLeft,
-                  padding: EdgeInsets.only(top: 2.0),
-                  child: Text(
-                    user.bio,
-                  ),
-                ),
-              ],
-            ),
-          );
-        });
-  }*/
   buildProfileHeader() {
     return FutureBuilder(
         future: usersRef.document(widget.profileId).get(),
@@ -349,13 +276,13 @@ class _ProfileState extends State<Profile> {
               child: Stack(
                 children: <Widget>[
                   Container(
-                    /*decoration: BoxDecoration(
+                    decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage("assets/images/bibi.jpg"),
-                        fit: BoxFit.cover,
-                      ),
-                    ),*/
-                    color: Colors.cyan,
+                          colorFilter: ColorFilter.mode(
+                              Color(0xFF3C4858), BlendMode.lighten),
+                          image: CachedNetworkImageProvider(user.photoUrl),
+                          fit: BoxFit.cover),
+                    ),
                   ),
                   Container(
                     height: MediaQuery.of(context).size.height,

@@ -89,20 +89,17 @@ class PostTile extends StatelessWidget {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: <Widget>[
-                                  Row(
-                                    children: <Widget>[
-                                      Icon(
-                                        Icons.event_note,
-                                        size: 18.0,
-                                        color: Color(0xFF3C4858),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text(post.title,
-                                            overflow: TextOverflow.fade),
-                                      ),
-                                    ],
-                                  ),
+                                  
+                                  Flexible(
+  child: new Container(
+    padding: new EdgeInsets.all(13.0),
+    child: new Text(
+      post.title,
+      overflow: TextOverflow.ellipsis,
+      
+    ),
+  ),
+),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: <Widget>[

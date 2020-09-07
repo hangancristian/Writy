@@ -3,7 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttershare/models/data.dart';
+
 import 'package:fluttershare/models/user.dart';
+import 'package:fluttershare/pages/analytics.dart';
 
 import 'package:fluttershare/pages/create_account.dart';
 import 'package:fluttershare/pages/profile.dart';
@@ -16,8 +19,8 @@ final GoogleSignIn googleSignIn = GoogleSignIn();
 final StorageReference storageRef = FirebaseStorage.instance.ref();
 final usersRef = Firestore.instance.collection('users');
 final postsRef = Firestore.instance.collection('posts');
-final commentsRef = Firestore.instance.collection('comments');
 final activityFeedRef = Firestore.instance.collection('feed');
+final commentsRef = Firestore.instance.collection('comments');
 final followersRef = Firestore.instance.collection('followers');
 final followingRef = Firestore.instance.collection('following');
 final timelineRef = Firestore.instance.collection('timeline');
@@ -73,18 +76,20 @@ class _HomeState extends State<Home> {
 
     if (!doc.exists) {
       // 2) if the user doesn't exist, then we want to take them to the create account page
-      final username = await Navigator.push(
+      Data result = await Navigator.push(
           context, MaterialPageRoute(builder: (context) => CreateAccount()));
 
       // 3) get username from create account, use it to make new user document in users collection
       usersRef.document(user.id).setData({
         "id": user.id,
-        "username": username,
+        "age": result.age,
+        "country": result.country,
         "photoUrl": user.photoUrl,
         "email": user.email,
         "displayName": user.displayName,
         "bio": "",
-        "timestamp": timestamp
+        "timestamp": timestamp,
+        "category": result.category
       });
       // make new user their own follower (to include their posts in their timeline)
       await followersRef
@@ -155,15 +160,6 @@ class _HomeState extends State<Home> {
             leading: Column(
               children: <Widget>[
                 SizedBox(
-                  height: 8,
-                ),
-                Center(
-                  child: CircleAvatar(
-                      radius: 16,
-                      backgroundImage:
-                          CachedNetworkImageProvider(currentUser.photoUrl)),
-                ),
-                SizedBox(
                   height: 30,
                 ),
                 RotatedBox(
@@ -173,6 +169,20 @@ class _HomeState extends State<Home> {
                     color: Color(0xffFCCFA8),
                     onPressed: logout,
                   ),
+                ),
+                RotatedBox(
+                  quarterTurns: 0,
+                  child: IconButton(
+                      icon: Icon(Icons.table_chart),
+                      color: Color(0xffFCCFA8),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  Analitycs(profileId: currentUser?.id)),
+                        );
+                      }),
                 )
               ],
             ),
@@ -197,6 +207,7 @@ class _HomeState extends State<Home> {
           ),
           Expanded(
             child: PageView(
+              physics: new NeverScrollableScrollPhysics(),
               children: <Widget>[
                 Timeline(currentUser: currentUser),
                 Search(),

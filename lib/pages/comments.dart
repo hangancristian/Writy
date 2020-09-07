@@ -60,7 +60,7 @@ class CommentsState extends State<Comments> {
 
   addComment() {
     commentsRef.document(postId).collection("comments").add({
-      "username": currentUser.username,
+      "username": currentUser.displayName,
       "comment": commentController.text,
       "timestamp": timestamp,
       "avatarUrl": currentUser.photoUrl,
@@ -74,7 +74,7 @@ class CommentsState extends State<Comments> {
         "timestamp": timestamp,
         "postId": postId,
         "userId": currentUser.id,
-        "username": currentUser.username,
+        "username": currentUser.displayName,
         "userProfileImg": currentUser.photoUrl,
         "mediaUrl": postMediaUrl,
       });
@@ -85,7 +85,6 @@ class CommentsState extends State<Comments> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: header(context, titleText: "Comments"),
       body: Column(
         children: <Widget>[
           Expanded(child: buildComments()),

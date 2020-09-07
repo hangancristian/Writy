@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:fluttershare/models/user.dart';
 import 'package:fluttershare/pages/activity_feed.dart';
 import 'package:fluttershare/pages/home.dart';
+import 'package:fluttershare/widgets/discover.dart';
+import 'package:fluttershare/widgets/discover_top.dart';
+import 'package:fluttershare/widgets/header.dart';
 import 'package:fluttershare/widgets/progress.dart';
+import 'package:fluttershare/widgets/constant.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -13,14 +17,31 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   TextEditingController searchController = TextEditingController();
+  final controller = ScrollController();
   Future<QuerySnapshot> searchResultsFuture;
+  String _query;
+
+  double offset = 0;
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  void onScroll() {
+    setState(() {});
+  }
 
   handleSearch(String query) {
-    Future<QuerySnapshot> users = usersRef
-        .where("displayName", isGreaterThanOrEqualTo: query)
-        .getDocuments();
+    Future<QuerySnapshot> users = usersRef.getDocuments();
     setState(() {
       searchResultsFuture = users;
+      _query = query;
     });
   }
 
@@ -53,20 +74,58 @@ class _SearchState extends State<Search> {
 
   Container buildNoContent() {
     return Container(
-      child: Center(
-        child: ListView(
-          shrinkWrap: true,
+      child: SingleChildScrollView(
+        controller: controller,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              "Find Users",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontStyle: FontStyle.italic,
-                fontWeight: FontWeight.w600,
-                fontSize: 60.0,
-              ),
+            MyHeader(
+              textTop: "Discover",
+              offset: offset,
             ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "Tech",
+                    style: kTitleTextstyle,
+                  ),
+                  SizedBox(height: 20),
+                  Discover(query: "Tech"),
+                  SizedBox(height: 20),
+                  Text(
+                    "Travel",
+                    style: kTitleTextstyle,
+                  ),
+                  SizedBox(height: 20),
+                  Discover(query: "Travel"),
+                  SizedBox(height: 20),
+                  Text(
+                    "Food",
+                    style: kTitleTextstyle,
+                  ),
+                  SizedBox(height: 20),
+                  Discover(query: "Food"),
+                  SizedBox(height: 20),
+                  Text(
+                    "Politics",
+                    style: kTitleTextstyle,
+                  ),
+                  SizedBox(height: 20),
+                  Discover(query: "Politics"),
+                  SizedBox(height: 20),
+                  Text(
+                    "Others",
+                    style: kTitleTextstyle,
+                  ),
+                  SizedBox(height: 20),
+                  Discover(query: "Others"),
+                  SizedBox(height: 20),
+                ],
+              ),
+            )
           ],
         ),
       ),
@@ -80,14 +139,26 @@ class _SearchState extends State<Search> {
         if (!snapshot.hasData) {
           return circularProgress();
         }
-        List<UserResult> searchResults = [];
+        List<UserCard> searchResults = [];
+        List<String> verify = [];
         snapshot.data.documents.forEach((doc) {
           User user = User.fromDocument(doc);
-          UserResult searchResult = UserResult(user);
-          searchResults.add(searchResult);
+          verify = user.displayName.toUpperCase().split(" ");
+          if (verify.contains(_query.toUpperCase())) {
+            UserCard searchResult = UserCard(user);
+            searchResults.add(searchResult);
+          }
         });
-        return ListView(
-          children: searchResults,
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: 30),
+              Wrap(
+                runSpacing: 10,
+                children: searchResults,
+              ),
+            ],
+          ),
         );
       },
     );
@@ -96,7 +167,7 @@ class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
+      backgroundColor: Colors.white,
       appBar: buildSearchField(),
       body:
           searchResultsFuture == null ? buildNoContent() : buildSearchResults(),
@@ -104,40 +175,47 @@ class _SearchState extends State<Search> {
   }
 }
 
-class UserResult extends StatelessWidget {
+class UserCard extends StatelessWidget {
   final User user;
 
-  UserResult(this.user);
+  UserCard(this.user);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).primaryColor.withOpacity(0.7),
-      child: Column(
-        children: <Widget>[
-          GestureDetector(
-            onTap: () => showProfile(context, profileId: user.id),
-            child: ListTile(
-              leading: CircleAvatar(
+    return GestureDetector(
+      onTap: () => showProfile(context, profileId: user.id),
+      child: Container(
+        padding: EdgeInsets.all(10),
+        margin: EdgeInsets.only(right: 10, left: 20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              offset: Offset(0, 10),
+              blurRadius: 20,
+              color: kActiveShadowColor,
+            ),
+          ],
+        ),
+        child: ConstrainedBox(
+          constraints: new BoxConstraints(
+            minWidth: 130.0,
+          ),
+          child: Column(
+            children: <Widget>[
+              CircleAvatar(
+                radius: 40.0,
                 backgroundColor: Colors.grey,
                 backgroundImage: CachedNetworkImageProvider(user.photoUrl),
               ),
-              title: Text(
+              Text(
                 user.displayName,
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              subtitle: Text(
-                user.username,
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+            ],
           ),
-          Divider(
-            height: 2.0,
-            color: Colors.white54,
-          ),
-        ],
+        ),
       ),
     );
   }

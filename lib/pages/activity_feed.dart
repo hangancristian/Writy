@@ -33,7 +33,6 @@ class _ActivityFeedState extends State<ActivityFeed> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.orange,
-      appBar: header(context, titleText: "Activity Feed"),
       body: Container(
           child: FutureBuilder(
         future: getActivityFeed(),

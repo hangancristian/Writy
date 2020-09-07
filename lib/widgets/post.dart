@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:animator/animator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,8 @@ import 'package:fluttershare/pages/home.dart';
 import 'package:fluttershare/pages/post_screen.dart';
 import 'package:fluttershare/widgets/custom_image.dart';
 import 'package:fluttershare/widgets/progress.dart';
+
+import 'constant.dart';
 
 class Post extends StatefulWidget {
   final String postId;
@@ -112,7 +113,7 @@ class _PostState extends State<Post> {
           title: GestureDetector(
             onTap: () => showProfile(context, profileId: user.id),
             child: Text(
-              user.username,
+              user.displayName,
               style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -239,7 +240,7 @@ class _PostState extends State<Post> {
           .document(postId)
           .setData({
         "type": "like",
-        "username": currentUser.username,
+        "username": currentUser.displayName,
         "userId": currentUser.id,
         "userProfileImg": currentUser.photoUrl,
         "postId": postId,
@@ -265,7 +266,7 @@ class _PostState extends State<Post> {
     }
   }
 
-  buildPostImage() {
+  /*buildPostImage() {
     return GestureDetector(
       onDoubleTap: handleLikePost,
       child: Stack(
@@ -291,7 +292,7 @@ class _PostState extends State<Post> {
         ],
       ),
     );
-  }
+  }*/
 
   buildPostFooter() {
     return Column(
@@ -369,155 +370,140 @@ class _PostState extends State<Post> {
         }
         User user = User.fromDocument(snapshot.data);
         //bool isPostOwner = currentUserId == ownerId;
+        Size size = MediaQuery.of(context).size;
         return Container(
           height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: Stack(
+          child: Column(
             children: <Widget>[
-              Container(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      colorFilter: ColorFilter.mode(
-                          Color(0xFF3C4858), BlendMode.lighten),
-                      image: CachedNetworkImageProvider(mediaUrl),
-                      fit: BoxFit.cover),
+              Padding(
+                padding: const EdgeInsets.only(bottom: kDefaultPadding),
+                child: SizedBox(
+                  height: size.height * 0.72,
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(),
+                      ),
+                      Container(
+                        height: size.height * 0.8,
+                        width: size.width * 0.75,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(63),
+                            bottomLeft: Radius.circular(63),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              offset: Offset(0, 10),
+                              blurRadius: 60,
+                              color: kPrimaryColor.withOpacity(0.29),
+                            ),
+                          ],
+                          image: DecorationImage(
+                            colorFilter: ColorFilter.mode(
+                                Color(0xFF3C4858), BlendMode.lighten),
+                            image: CachedNetworkImageProvider(mediaUrl),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              Container(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                color: Color.fromRGBO(0, 0, 0, 0.4),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      height: 80,
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 30.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 21.3),
+                      child: Text(
+                        "by" + " " + user.displayName,
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: kPrimaryColor,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
-              Column(
+              //SizedBox(height: 60),
+              Row(
                 children: <Widget>[
-                  // Top section
-                  Container(
-                    height: MediaQuery.of(context).size.height / 3,
-                    padding: EdgeInsets.only(left: 30.0),
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: GestureDetector(
-                        onTap: () => showProfile(context, profileId: user.id),
-                        child: Text(
-                          user.displayName,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 35.0,
-                              color: Colors.white),
+                  Expanded(
+                    child: FlatButton(
+                      onPressed: () { showComments(
+                context,
+                postId: postId,
+                ownerId: ownerId,
+                mediaUrl: mediaUrl,
+              );},
+                      child: Text("Comment"),
+                    ),
+                  ),
+                  SizedBox(
+                    width: size.width / 2,
+                    height: 84,
+                    child: FlatButton(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(20),
+                        ),
+                      ),
+                      color: kPrimaryColor,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PostScreen(
+                              ownerId: ownerId,
+                              postId: postId,
+                              userId: ownerId,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "Read article",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
                         ),
                       ),
                     ),
                   ),
-                  Divider(
-                    color: Colors.white,
-                    height: 20,
-                    thickness: 2,
-                    indent: 105,
-                    endIndent: 100,
-                  ),
-                  Container(
-                    padding: EdgeInsets.only(bottom: 10.0),
-                  ),
-                  // Middle expanded
-
-                  Expanded(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Container(
-                          width: 100.0,
-                        ),
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(40.0),
-                                  bottomLeft: Radius.circular(40.0)),
-                              color: Colors.white,
-                            ),
-                            child: Column(
-                              children: <Widget>[
-                                Container(
-                                  padding:
-                                      EdgeInsets.only(top: 70.0, left: 25.0),
-                                  child: Text(
-                                    title,
-                                    style: TextStyle(
-                                      fontSize: 30.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  height: 215.0,
-                                  padding:
-                                      EdgeInsets.only(top: 20.0, left: 25.0),
-                                  child: Text(
-                                    content,
-                                    overflow: TextOverflow.fade,
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Bottom Section
-                  Container(
-                    height: 80.0,
-                  ),
                 ],
               ),
-              Positioned(
-                  height: 80,
-                  width: 80,
-                  right: 10,
-                  bottom: 50,
-                  child: RaisedButton(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15)),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PostScreen(
-                            ownerId: ownerId,
-                            postId: postId,
-                            userId: ownerId,
-                          ),
-                        ),
-                      );
-                    },
-                    color: Colors.amber,
-                    child: Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.white,
-                    ),
-                  )),
             ],
           ),
         );
       },
     );
   }
-}
 
-showComments(BuildContext context,
-    {String postId, String ownerId, String mediaUrl}) {
-  Navigator.push(context, MaterialPageRoute(builder: (context) {
-    return Comments(
-      postId: postId,
-      postOwnerId: ownerId,
-      postMediaUrl: mediaUrl,
-    );
-  }));
+  showComments(BuildContext context,
+      {String postId, String ownerId, String mediaUrl}) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return Comments(
+        postId: postId,
+        postOwnerId: ownerId,
+        postMediaUrl: mediaUrl,
+      );
+    }));
+  }
 }

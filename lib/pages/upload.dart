@@ -80,18 +80,19 @@ class _UploadState extends State<Upload>
           Padding(
             padding: EdgeInsets.only(top: 20.0),
             child: RaisedButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Text(
+                "Upload Image",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22.0,
                 ),
-                child: Text(
-                  "Upload Image",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22.0,
-                  ),
-                ),
-                color: Colors.deepOrange,
-                onPressed: () => selectImage(context)),
+              ),
+              color: Colors.deepOrange,
+              onPressed: () => selectImage(context),
+            ),
           ),
         ],
       ),
@@ -131,7 +132,7 @@ class _UploadState extends State<Upload>
         .setData({
       "postId": postId,
       "ownerId": widget.currentUser.id,
-      "username": widget.currentUser.username,
+      "username": widget.currentUser.displayName,
       "mediaUrl": mediaUrl,
       "content": content,
       "title": title,
@@ -203,7 +204,8 @@ class _UploadState extends State<Upload>
                     controller: titleController,
                     keyboardType: TextInputType.multiline,
                     minLines: 1,
-                    maxLines: 3,
+                    maxLines: 1,
+                    maxLength: 30,
                     cursorColor: Color(0xFF3C4858),
                     style: TextStyle(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
